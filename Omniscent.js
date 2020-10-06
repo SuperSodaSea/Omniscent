@@ -40,10 +40,17 @@ class Omniscent {
             depthTest: false,
             alphaTest: 0.5,
             side: THREE.BackSide,
+            vertexColors: true,
         });
         this.sceneMesh = new THREE.Mesh(undefined, this.sceneMaterial);
         this.scene.add(this.sceneMesh);
-        this.camera = new THREE.PerspectiveCamera(70, 320 / (179 - 21 + 1), 0.015625, 4096.0);
+        this.camera = new THREE.Camera();
+        this.camera.projectionMatrix.set(
+            2 / 320 * 1.2, 0, 0, 0,
+            0, 2 / (179 - 21 + 1), 0, 0,
+            0, 0, 0, -1 / 512,
+            0, 0, -1 / 160, 13 / 160,
+        );
         this.camera.scale.y = -1;
         
         window.addEventListener('resize', () => this.onResize(), false);
@@ -930,6 +937,7 @@ class Omniscent {
     
     convertModel() {
         let positionData = [];
+        let colorData = [];
         let textureCoordData = [];
         let indexData = [];
         
@@ -937,19 +945,33 @@ class Omniscent {
         let indexOffset = 0;
         for(let i = 0; i < this.quadCount; ++i) {
             let quadIndex = this.sortList[i * 2 + 1];
+            let textureIndex = this.quads[quadIndex * 5 + 4];
+            let clipped = false;
+            for(let j = 0; j < 4; ++j) {
+                let vertexIndex = this.quads[quadIndex * 5 + j];
+                if(this.transformedVertexs[vertexIndex * 3 + 2] + 512 < 0) {
+                    clipped = true;
+                    break;
+                }
+            }
+            if(clipped) continue;
             for(let j = 0; j < 4; ++j) {
                 let vertexIndex = this.quads[quadIndex * 5 + j];
                 for(let k = 0; k < 3; ++k)
                     positionData.push(this.transformedVertexs[vertexIndex * 3 + k]);
+                let color = textureIndex <= 2 ? 0xFF : (
+                    (this.vertexs[vertexIndex * 4 + 3] / 0x7F00)
+                    * (Math.min(511, this.transformedVertexs[vertexIndex * 3 + 2] + 512) / 511)
+                    * 0xFF) | 0;
+                colorData.push(color, color, color);
             }
-            let textureIndex = this.quads[quadIndex * 5 + 4];
             let textureX = (textureIndex & 0x3) * textureUnitX;
             let textureY = (textureIndex >> 2) * textureUnitY;
             textureCoordData.push(
-                textureX, textureY + textureUnitY,
+                textureX, textureY + textureUnitY * (63 / 64),
                 textureX, textureY,
-                textureX + textureUnitX, textureY,
-                textureX + textureUnitX, textureY + textureUnitY,
+                textureX + textureUnitX * (63 / 64), textureY,
+                textureX + textureUnitX * (63 / 64), textureY + textureUnitY * (63 / 64),
             );
             indexData.push(indexOffset, indexOffset + 1, indexOffset + 2,
                 indexOffset, indexOffset + 2, indexOffset + 3);
@@ -958,6 +980,7 @@ class Omniscent {
         
         let geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positionData, 3));
+        geometry.setAttribute('color', new THREE.Uint8BufferAttribute(colorData, 3, true));
         geometry.setAttribute('uv', new THREE.Float32BufferAttribute(textureCoordData, 2));
         geometry.setIndex(indexData);
         return geometry;
@@ -1015,7 +1038,7 @@ setInterval(function() {
 }, 1000);
 
 function run() {
-    if(OMNISCENT.running) return;
+    if(OMNISCENT.running) { OMNISCENT.hardwareRenderer = !OMNISCENT.hardwareRenderer; return; }
     OMNISCENT.reset();
     OMNISCENT.start();
 }
