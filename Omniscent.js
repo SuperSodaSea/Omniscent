@@ -379,10 +379,10 @@ class Omniscent {
                 if(this.midiIndexs[i][1] === 0) {
                     this.midiIndexs[i][0] += 2;
                     if(this.midiIndexs[i][0] > 0)
-                        this.midiOutput.send([0x80 | channel, data[this.midiIndexs[i][0] - 2], 0x7F]);
+                        this.sendMIDI([0x80 | channel, data[this.midiIndexs[i][0] - 2], 0x7F]);
                     if(this.midiIndexs[i][0] >= data.length) continue;
                     this.midiIndexs[i][1] = data[this.midiIndexs[i][0] + 1] * 29;
-                    this.midiOutput.send([0x90 | channel, data[this.midiIndexs[i][0]], 0x7F]);
+                    this.sendMIDI([0x90 | channel, data[this.midiIndexs[i][0]], 0x7F]);
                 }
                 --this.midiIndexs[i][1];
             }
@@ -764,6 +764,10 @@ class Omniscent {
         }
     }
     
+    sendMIDI(data) {
+        this.midiOutput.send(data);
+    }
+    
     // 0x0C80-0x0DCA
     generateModel() {
         // 0x1047-0x105E: Index data
@@ -875,7 +879,7 @@ class Omniscent {
             this.midiIndexs[i] = [-2, 0];
         
         for(const channelData of this.midiData)
-            this.midiOutput.send([0xC0 + channelData.channel, channelData.instrument]);
+            this.sendMIDI([0xC0 + channelData.channel, channelData.instrument]);
         
         function getTime() { return (new Date()).getTime(); }
         function wait() { return new Promise((resolve) => setTimeout(resolve, 10)); }
@@ -897,7 +901,7 @@ class Omniscent {
         
         // 0x052C
         for(let i = 1; i <= 15; ++i)
-            this.midiOutput.send([0xB0 + i, 0x7B, 0x00]);
+            this.sendMIDI([0xB0 + i, 0x7B, 0x00]);
         
         console.log('End.');
         
