@@ -1547,7 +1547,6 @@ function run() {
         if (OMNISCENT.midi.midiOutput) {
             OMNISCENT.midi.midiOutput.disconnect();
         }
-        console.log(selectMidiOut.options[selectMidiOut.selectedIndex]);
         OMNISCENT.midi.midiOutput = JZZ().openMidiOut(selectMidiOut.options[selectMidiOut.selectedIndex].value).or(function(){alert('Cannot open MIDI port!');});
         selectMidiOut.disabled = true;
         OMNISCENT.start().then(() => {
