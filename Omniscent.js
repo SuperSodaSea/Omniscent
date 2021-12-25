@@ -207,11 +207,10 @@ class OmniscentMIDI {
     }
     
     sendMIDI(data) {
-        this.midiOutput.send(data);
+        if(this.midiOutput)
+            this.midiOutput.send(data);
     }
     async start() {
-        this.midiOutput = this.midiOutput || await JZZ.synth.Tiny();
-        
         for(let i = 0; i < this.midiData.length; ++i)
             this.midiIndexs[i] = [-2, 0];
         
@@ -222,6 +221,10 @@ class OmniscentMIDI {
         // 0x052C
         for(let i = 1; i <= 15; ++i)
             this.sendMIDI([0xB0 + i, 0x7B, 0x00]);
+        if (this.midiOutput) {
+            this.midiOutput.disconnect();
+            this.midiOutput = undefined;
+        }
     }
     onTimer() {
         // 0x0568
@@ -1453,13 +1456,13 @@ class Omniscent {
         this.midi = new OmniscentMIDI();
         this.renderer = new OmniscentRenderer(this.canvas);
         
+        // Use WebGL to render model instead of original software rasterizer
+        this.useHardwareRenderer = false;
+
         this.reset();
     }
     
     reset() {
-        // Use WebGL to render model instead of original software rasterizer
-        this.useHardwareRenderer = false;
-        
         this.running = false;
         this.stopping = false;
         
@@ -1525,6 +1528,7 @@ class Omniscent {
 
 const canvas = document.getElementById('mainCanvas');
 const OMNISCENT = new Omniscent(canvas);
+const selectMidiOut = document.getElementById('selectmidiout');
 
 
 let frameCounter = 0;
@@ -1539,9 +1543,39 @@ setInterval(function() {
 }, 1000);
 
 function run() {
-    if(OMNISCENT.running) {
-        OMNISCENT.useHardwareRenderer = !OMNISCENT.useHardwareRenderer;
-        return;
+    if(!OMNISCENT.running) {
+        if (OMNISCENT.midi.midiOutput) {
+            OMNISCENT.midi.midiOutput.disconnect();
+        }
+        console.log(selectMidiOut.options[selectMidiOut.selectedIndex]);
+        OMNISCENT.midi.midiOutput = JZZ().openMidiOut(selectMidiOut.options[selectMidiOut.selectedIndex].value).or(function(){alert('Cannot open MIDI port!');});
+        selectMidiOut.disabled = true;
+        OMNISCENT.start().then(() => {
+            document.getElementById('play-btn').value = 'Play';
+            selectMidiOut.disabled = false;
+        });
     }
-    OMNISCENT.start();
+    else
+        OMNISCENT.stop();
 }
+
+document.getElementById('play-btn').addEventListener('click', e => {
+    run();
+    e.srcElement.value = OMNISCENT.running ? 'Stop' : 'Play';
+});
+
+document.getElementById('hardware').addEventListener('click', e => {
+    OMNISCENT.useHardwareRenderer = e.srcElement.checked;
+});
+
+JZZ.synth.Tiny.register('Synth');
+
+JZZ().and(function(){
+  var i;
+  for (i = 0; i < this.info().outputs.length; i++) {
+    selectMidiOut[i] = new Option(this.info().outputs[i].name);
+  }
+  if (!i) {
+    selectMidiOut[i] = new Option('Not available');
+  } 
+});

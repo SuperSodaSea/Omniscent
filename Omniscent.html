@@ -76,6 +76,10 @@
                 bottom: 1px;
                 top: auto;
             }
+            #controls {
+            	background-color: #aaa;
+            	padding: 2px;
+            }
         </style>
     </head>
     
@@ -86,12 +90,18 @@
         <table border="0">
             <tr>
                 <td>
-                    <canvas id="mainCanvas" width="1" height="1" onclick="run()"></canvas>
+                	<div id="fps"></div>
+                    <canvas id="mainCanvas" width="1" height="1"></canvas>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <div id="fps">-</div>
+                    <div id="controls">
+                    	Controls:
+                    	<input type="button" value="Play" id="play-btn">
+                    	<input type="checkbox" id="hardware"> Use hardware renderer
+                    	<span style="float: right;">MIDI Out: <select id=selectmidiout></select></span>
+                    </div>
                 </td>
             </tr>
         </table>
