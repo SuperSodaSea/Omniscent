@@ -716,6 +716,7 @@ class OmniscentTexture {
     
     // 0x01BD-0x02FE
     reset() {
+        this.doorCounter = -4250;
         // 0x01BD-0x01C7
         // Generate texture 0x11
         this.generateCircleNoise(0x11, 0x05, 0x0320);
