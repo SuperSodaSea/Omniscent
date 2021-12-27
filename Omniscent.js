@@ -1075,6 +1075,7 @@ class OmniscentRenderer {
         this.frameBufferMaterial.map
             = new THREE.DataTexture(this.convertFrameBuffer(this.frameBuffer),
                 320, 200, THREE.RGBFormat);
+        this.frameBufferMaterial.map.needsUpdate = true;
         this.renderer.setViewport(0, 0, width, height);
         this.renderer.render(this.frameBufferScene, this.frameBufferCamera);
         this.frameBufferMaterial.map.dispose();
