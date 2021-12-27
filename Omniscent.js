@@ -1011,40 +1011,53 @@ class OmniscentRenderer {
         this.frameBufferMesh = new THREE.Mesh(this.frameBufferGeometry, this.frameBufferMaterial);
         this.frameBufferScene.add(this.frameBufferMesh);
         this.frameBufferCamera = new THREE.OrthographicCamera(-0.5, 0.5, -0.5, 0.5, 0.0, 1.0);
-
+        
+        const glslPredef = `
+            #if __VERSION__ >= 300
+            #   define centroid_in centroid in
+            #   define centroid_out centroid out
+            #   define sample texture
+            #else
+            #   define centroid_in varying
+            #   define centroid_out varying
+            #   define sample texture2D
+            #endif
+        `;
+        
         this.scene = new THREE.Scene();
         this.sceneMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 colorTexture: {value: null},
                 lightMapTexture: {value: null},
             },
-            vertexShader: `
-                attribute float color;
-                varying vec2 textureCoord;
-                varying float light;
+            vertexShader: glslPredef + `
+                attribute vec4 textureCoord;
+                attribute float light;
+                centroid_out vec4 textureCoordV;
+                centroid_out float lightV;
                 void main() {
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    textureCoord = uv;
-                    light = color;
+                    textureCoordV = textureCoord;
+                    lightV = light;
                 }
             `,
-            fragmentShader: `
+            fragmentShader: glslPredef + `
                 uniform sampler2D colorTexture;
                 uniform sampler2D lightMapTexture;
-                varying vec2 textureCoord;
-                varying float light;
+                centroid_in vec4 textureCoordV;
+                centroid_in float lightV;
                 void main() {
-                    float paletteIndex = texture2D(colorTexture, textureCoord).r;
+                    vec2 textureCoord = textureCoordV.xy + clamp(textureCoordV.zw, 1e-5, 63.0 / 64.0 / 4.0 - 1e-5);
+                    float paletteIndex = sample(colorTexture, textureCoord).r;
                     vec2 coord = vec2(
                         255.0 / 256.0 * paletteIndex + 0.5 / 256.0,
-                        1.0 / 128.0 * floor(1.0 / 256.0 * light) + 0.5 / 128.0);
-                    gl_FragColor = texture2D(lightMapTexture, coord);
+                        1.0 / 128.0 * floor(1.0 / 256.0 * lightV) + 0.5 / 128.0);
+                    gl_FragColor = sample(lightMapTexture, coord);
                 }
             `,
             side: THREE.BackSide,
             depthTest: false,
             transparent: true,
-            blending: THREE.NormalBlending,
         });
         this.sceneMesh = new THREE.Mesh(undefined, this.sceneMaterial);
         this.scene.add(this.sceneMesh);
@@ -1397,6 +1410,7 @@ class OmniscentRenderer {
         const indexData = [];
         
         const textureUnitX = 1 / 4, textureUnitY = 1 / 4;
+        const textureDX = (63 / 64) * textureUnitX, textureDY = (63 / 64) * textureUnitY;
         let indexOffset = 0;
         for(let i = 0; i < this.model.quadCount; ++i) {
             const quadIndex = this.sortList[i * 2 + 1];
@@ -1421,14 +1435,12 @@ class OmniscentRenderer {
                 colorData.push(color);
             }
             const textureX0 = (textureIndex & 0x3) * textureUnitX;
-            const textureY0 = (textureIndex >> 2) * textureUnitY + 1e-3;
-            const textureX1 = textureX0 + textureUnitX * (63 / 64);
-            const textureY1 = textureY0 + textureUnitY * (63 / 64);
+            const textureY0 = (textureIndex >> 2) * textureUnitY;
             textureCoordData.push(
-                textureX0, textureY1,
-                textureX0, textureY0,
-                textureX1, textureY0,
-                textureX1, textureY1,
+                textureX0, textureY0, 0, textureDY,
+                textureX0, textureY0, 0, 0,
+                textureX0, textureY0, textureDX, 0,
+                textureX0, textureY0, textureDX, textureDY
             );
             indexData.push(indexOffset, indexOffset + 1, indexOffset + 2,
                 indexOffset, indexOffset + 2, indexOffset + 3);
@@ -1437,8 +1449,8 @@ class OmniscentRenderer {
         
         const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positionData, 3));
-        geometry.setAttribute('color', new THREE.Uint16BufferAttribute(colorData, 1, false));
-        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(textureCoordData, 2));
+        geometry.setAttribute('textureCoord', new THREE.Float32BufferAttribute(textureCoordData, 4));
+        geometry.setAttribute('light', new THREE.Uint16BufferAttribute(colorData, 1, false));
         geometry.setIndex(indexData);
         return geometry;
     }
@@ -1478,16 +1490,14 @@ class OmniscentRenderer {
         const result = new Uint8Array(4 * WIDTH * HEIGHT);
         const lightMap = this.lightMap.getLightMap();
         const palette = this.palette.getPalette();
-        let index = 0;
-        for(let i = 0; i < 256; ++i) {
-            for(let j = 0; j < 128; ++j, ++index) {
+        let index = 256;
+        for(let i = 1; i < 128; ++i) {
+            for(let j = 0; j < 256; ++j, ++index) {
                 const value = lightMap[index];
-                if(value !== 0) {
-                    result[index * 4] = palette[value * 3];
-                    result[index * 4 + 1] = palette[value * 3 + 1];
-                    result[index * 4 + 2] = palette[value * 3 + 2];
-                    result[index * 4 + 3] = 0xFF;
-                }
+                result[index * 4] = palette[value * 3];
+                result[index * 4 + 1] = palette[value * 3 + 1];
+                result[index * 4 + 2] = palette[value * 3 + 2];
+                result[index * 4 + 3] = 0xFF;
             }
         }
         const texture = new THREE.DataTexture(result, WIDTH, HEIGHT, THREE.RGBAFormat);
