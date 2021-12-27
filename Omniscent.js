@@ -41,7 +41,7 @@ class OmniscentUtil {
     static quickSort(data, l, r) {
         if(l >= r) return;
         let ll = l, rr = r;
-        let x = data[ll * 2];
+        const x = data[ll * 2];
         do {
             while(data[ll * 2] > x) ++ll;
             while(data[rr * 2] < x) --rr;
@@ -468,13 +468,13 @@ class OmniscentModel {
         this.vertexs = new Int16Array(362 * 4);
         this.quads = new Int16Array(367 * 5);
         let p = 0;
-        let int16Table = new Int16Array(4 * 15);
-        let float32Table = new Float32Array(3 * 15);
+        const int16Table = new Int16Array(4 * 15);
+        const float32Table = new Float32Array(3 * 15);
         for(let i = 0; i < 4; ++i) {
             // 0x0C8B-0x0CAE
             for(let j = 0; j < 15; ++j) {
                 for(let k = 0; k < 3; ++k) {
-                    let x = OmniscentModel.VERTEX_TABLE[j * 3 + k];
+                    const x = OmniscentModel.VERTEX_TABLE[j * 3 + k];
                     int16Table[j * 4 + k] = x;
                     float32Table[j * 3 + k] = x;
                 }
@@ -482,10 +482,10 @@ class OmniscentModel {
             }
             // 0x0CAF-0x0DC0
             while(true) {
-                let a = OmniscentModel.MODEL_TABLE[p++];
+                const a = OmniscentModel.MODEL_TABLE[p++];
                 if(a === 0xFF) break;
-                let face = a & 0x0F;
-                let light = ((a << 8) & 0x7000) | 0x0F00;
+                const face = a & 0x0F;
+                const light = ((a << 8) & 0x7000) | 0x0F00;
                 for(let j = 0; j < 6; ++j) {
                     let textureIndex;
                     if(j & 0x01)
@@ -496,7 +496,7 @@ class OmniscentModel {
                     if(textureIndex < 0) continue;
                     this.quads[this.quadCount * 5 + 4] = textureIndex;
                     for(let k = 0; k < 4; ++k) {
-                        let index = OmniscentModel.INDEX_TABLE[j * 4 + k] >> 3;
+                        const index = OmniscentModel.INDEX_TABLE[j * 4 + k] >> 3;
                         let vertexIndex = 0;
                         for(; vertexIndex < this.vertexCount; ++vertexIndex)
                             if(int16Table[index * 4] === this.vertexs[vertexIndex * 4]
@@ -520,27 +520,27 @@ class OmniscentModel {
                 if(a & 0x80) {
                     let angle = (OmniscentModel.MODEL_TABLE[p] << 8) & 0xF000;
                     if(angle >= 0x8000) angle -= 0x10000;
-                    let angles = [
+                    const angles = [
                         OmniscentModel.MODEL_TABLE[p] & 0x04 ? angle : 0,
                         OmniscentModel.MODEL_TABLE[p] & 0x02 ? angle : 0,
                         OmniscentModel.MODEL_TABLE[p] & 0x01 ? angle : 0,
                     ];
                     for(let j = 0; j < 14; ++j) {
-                        let v = OmniscentUtil.rotateVector3([
+                        const v = OmniscentUtil.rotateVector3([
                                 float32Table[j * 3],
                                 float32Table[j * 3 + 1],
                                 float32Table[j * 3 + 2]
                             ], angles);
-                            float32Table[j * 3] = v[0];
-                            float32Table[j * 3 + 1] = v[1];
-                            float32Table[j * 3 + 2] = v[2];
+                        float32Table[j * 3] = v[0];
+                        float32Table[j * 3 + 1] = v[1];
+                        float32Table[j * 3 + 2] = v[2];
                     }
                     ++p;
                 }
                 // 0x0D77
                 for(let j = 0; j < 4; ++j) {
-                    let index0 = OmniscentModel.INDEX_TABLE[face * 4 + j] >> 3;
-                    let index1 = OmniscentModel.INDEX_TABLE[(face * 4 + j) ^ 0x7] >> 3;
+                    const index0 = OmniscentModel.INDEX_TABLE[face * 4 + j] >> 3;
+                    const index1 = OmniscentModel.INDEX_TABLE[(face * 4 + j) ^ 0x7] >> 3;
                     for(let k = 0; k < 4; ++k)
                         int16Table[index1 * 4 + k] = int16Table[index0 * 4 + k];
                     for(let k = 0; k < 3; ++k)
@@ -554,8 +554,8 @@ class OmniscentModel {
     
     // 0x0493-0x04D2
     transformModel(camera) {
-        let cameraPosition = camera.getPosition();
-        let cameraMatrix = camera.getMatrix();
+        const cameraPosition = camera.getPosition();
+        const cameraMatrix = camera.getMatrix();
         for(let i = 0; i < this.vertexCount; ++i)
             for(let j = 0; j < 3; ++j)
                 this.transformedVertexs[i * 3 + j] =
@@ -783,7 +783,7 @@ class OmniscentTexture {
             const offset = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 5];
             for(let y = y0; y <= y1; ++y)
                 for(let x = x0; x <= x1; ++x) {
-                    let index = (y << 6) | x;
+                    const index = (y << 6) | x;
                     let a;
                     switch(mode) {
                     case 1: {
@@ -1013,11 +1013,36 @@ class OmniscentRenderer {
         this.frameBufferCamera = new THREE.OrthographicCamera(-0.5, 0.5, -0.5, 0.5, 0.0, 1.0);
 
         this.scene = new THREE.Scene();
-        this.sceneMaterial = new THREE.MeshBasicMaterial({
+        this.sceneMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                colorTexture: {value: null},
+                lightMapTexture: {value: null},
+            },
+            vertexShader: `
+                attribute float color;
+                varying vec2 textureCoord;
+                varying float light;
+                void main() {
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    textureCoord = uv;
+                    light = color;
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D colorTexture;
+                uniform sampler2D lightMapTexture;
+                varying vec2 textureCoord;
+                varying float light;
+                void main() {
+                    float paletteIndex = texture2D(colorTexture, textureCoord).r;
+                    vec2 coord = vec2(
+                        255.0 / 256.0 * paletteIndex + 0.5 / 256.0,
+                        1.0 / 128.0 * floor(1.0 / 256.0 * light) + 0.5 / 128.0);
+                    gl_FragColor = texture2D(lightMapTexture, coord);
+                }
+            `,
             depthTest: false,
-            alphaTest: 0.5,
             side: THREE.BackSide,
-            vertexColors: true,
         });
         this.sceneMesh = new THREE.Mesh(undefined, this.sceneMaterial);
         this.scene.add(this.sceneMesh);
@@ -1072,29 +1097,28 @@ class OmniscentRenderer {
         const width = size.x, height = size.y;
         
         this.renderer.clear();
-        this.frameBufferMaterial.map
-            = new THREE.DataTexture(this.convertFrameBuffer(this.frameBuffer),
-                320, 200, THREE.RGBFormat);
-        this.frameBufferMaterial.map.needsUpdate = true;
+        const frameBufferTexture = this.convertFrameBuffer(this.frameBuffer);
+        this.frameBufferMaterial.map = frameBufferTexture;
         this.renderer.setViewport(0, 0, width, height);
         this.renderer.render(this.frameBufferScene, this.frameBufferCamera);
-        this.frameBufferMaterial.map.dispose();
+        frameBufferTexture.dispose();
     }
     
     // 0x074E-0x09BE
     drawPolygon(textureIndex, clippedVertexCount, clippedDataI) {
+        const lightMap = this.lightMap.getLightMap();
+        
         // 0x0752
         let minX = 32767, maxX = -32767;
         let minY = 32767, maxY = -32767;
         let indexL, indexR;
         for(let i = 0; i < clippedVertexCount; ++i) {
-            let x = clippedDataI[4][i] >> 16;
+            const x = clippedDataI[4][i] >> 16;
             if(minX > x) minX = x;
             if(maxX < x) maxX = x;
-            let y = OmniscentUtil.toInt16(clippedDataI[3][i]);
+            const y = OmniscentUtil.toInt16(clippedDataI[3][i]);
             if(minY > y) minY = y, indexL = indexR = i;
             if(maxY < y) maxY = y;
-            // console.log(x, y);
         }
         
         // 0x0793
@@ -1105,22 +1129,22 @@ class OmniscentRenderer {
         let scanlineY = minY;
         
         // [BP - 0x3C]
-        let t0 = new Int32Array(10);
+        const t0 = new Int32Array(10);
         // [BP - 0x78]
-        let t1 = new Int32Array(10);
+        const t1 = new Int32Array(10);
         // [BP - 0x50]
-        let t2 = new Int32Array(5);
+        const t2 = new Int32Array(5);
         // [BP - 0x14]
-        let t3 = new Int32Array(5);
+        const t3 = new Int32Array(5);
         
         // 0x09BF-0x0A08
         function interpolate(index0, index1, offset) {
-            let y = OmniscentUtil.toInt16(clippedDataI[3][index1]);
-            let dy = y - scanlineY;
+            const y = OmniscentUtil.toInt16(clippedDataI[3][index1]);
+            const dy = y - scanlineY;
             for(let i = 0; i < 5; ++i) {
-                let x0 = clippedDataI[4 + i][index0];
+                const x0 = clippedDataI[4 + i][index0];
                 t0[offset + i] = x0;
-                let x1 = clippedDataI[4 + i][index1];
+                const x1 = clippedDataI[4 + i][index1];
                 let dx = x1 - x0;
                 if(dy !== 0) {
                     dx = (dx / dy) | 0;
@@ -1135,24 +1159,24 @@ class OmniscentRenderer {
         while(scanlineY <= maxY) {
             // 0x07E8
             while(scanlineY <= maxY) { // while(true)?
-                let y = OmniscentUtil.toInt16(clippedDataI[3][indexL]);
+                const y = OmniscentUtil.toInt16(clippedDataI[3][indexL]);
                 if(scanlineY !== y) break;
-                let index0 = indexL;
+                const index0 = indexL;
                 if(--indexL < 0) indexL = clippedVertexCount - 1;
                 interpolate(index0, indexL, 0);
             }
             // 0x0816
             while(scanlineY <= maxY) { // while(true)?
-                let y = OmniscentUtil.toInt16(clippedDataI[3][indexR]);
+                const y = OmniscentUtil.toInt16(clippedDataI[3][indexR]);
                 if(scanlineY !== y) break;
-                let index0 = indexR;
+                const index0 = indexR;
                 if(++indexR === clippedVertexCount) indexR = 0;
                 interpolate(index0, indexR, 5);
             }
             // 0x0846
             if(scanlineY >= 21) {
                 let l = t0[0] >> 16, r = t0[5] >> 16;
-                let dx = r - l;
+                const dx = r - l;
                 if(dx !== 0 && r > 0 && l <= 320) {
                     // 0x0878
                     let dl = -l;
@@ -1160,14 +1184,14 @@ class OmniscentRenderer {
                     else l = 0;
                     // 0x0885
                     for(let i = 1; i < 5; ++i) {
-                        let a0 = t0[i], a1 = t0[5 + i];
-                        let da = a1 - a0;
+                        const a0 = t0[i], a1 = t0[5 + i];
+                        const da = a1 - a0;
                         if(dx !== 0)
                             t2[i] = da / dx;
                         t3[i] = t2[i] * dl + a0;
                     }
                     // 0x08AF
-                    let dd = OmniscentUtil.toInt16(t2[4]);
+                    const dd = OmniscentUtil.toInt16(t2[4]);
                     if(r > 320) r = 320;
                     let p = scanlineY * 320 + l;
                     let u0 = OmniscentUtil.toInt16(t3[1] * 256 / t3[3]); // [BP - 0x8C]
@@ -1182,13 +1206,13 @@ class OmniscentRenderer {
                         t3[3] += t2[3] * d;
                         let u1 = OmniscentUtil.toInt16(t3[1] * 256 / t3[3]);
                         let v1 = OmniscentUtil.toInt16(t3[2] * 256 / t3[3]);
-                        let du = OmniscentUtil.toInt16((u1 - u0) / d);
-                        let dv = OmniscentUtil.toInt16((v1 - v0) / d);
+                        const du = OmniscentUtil.toInt16((u1 - u0) / d);
+                        const dv = OmniscentUtil.toInt16((v1 - v0) / d);
                         for(let i = 0; i < d; ++i) {
-                            let q = ((v0 & 0xFF00) >> 2) | (u0 >> 8);
-                            let value = texture[q];
+                            const q = ((v0 & 0xFF00) >> 2) | (u0 >> 8);
+                            const value = texture[q];
                             if(value)
-                                this.frameBuffer[p] = this.lightMap.getLightMap()[value + (t3[4] & 0xFF00)];
+                                this.frameBuffer[p] = lightMap[value + (t3[4] & 0xFF00)];
                             t3[4] += dd;
                             u0 = OmniscentUtil.toInt16(u0 + du);
                             v0 = OmniscentUtil.toInt16(v0 + dv);
@@ -1210,9 +1234,9 @@ class OmniscentRenderer {
     // 0x0A09-0x0B5F
     drawQuad(quadIndex) {
         // [BP - 0xBE, 0xBA, 0xB6, (0xB2), (0xAE), 0xAA, 0xA6, (0xA2), 0x9E]
-        let data = new Array(9), dataI = new Array(9);
+        const data = new Array(9), dataI = new Array(9);
         // [BP - 0x172, 0x16E, 0x16A, (0x166), (0x162), 0x15E, 0x15A, (0x156), 0x152]
-        let clippedData = new Array(9), clippedDataI = new Array(9);
+        const clippedData = new Array(9), clippedDataI = new Array(9);
         for(let i = 0; i < 9; ++i) {
             data[i] = new Float32Array(4);
             clippedData[i] = new Float32Array(5);
@@ -1224,7 +1248,7 @@ class OmniscentRenderer {
         
         // 0x0A0D
         for(let i = 0; i < 4; ++i) {
-            let vertexIndex = this.model.quads[quadIndex * 5 + i];
+            const vertexIndex = this.model.quads[quadIndex * 5 + i];
             data[0][i] = this.model.transformedVertexs[vertexIndex * 3];
             data[1][i] = this.model.transformedVertexs[vertexIndex * 3 + 1];
             data[2][i] = this.model.transformedVertexs[vertexIndex * 3 + 2];
@@ -1236,7 +1260,7 @@ class OmniscentRenderer {
             dataI[5][i] = OmniscentRenderer.TEXTURE_COORD_U_TABLE[i] << 16;
         }
         // 0x0A80
-        let textureIndex = this.model.quads[quadIndex * 5 + 4];
+        const textureIndex = this.model.quads[quadIndex * 5 + 4];
         // 0x0A85
         let clippedVertexCount = 0;
         // 0x0A8A
@@ -1246,7 +1270,7 @@ class OmniscentRenderer {
         function clip(i1) {
             let i0 = i1 - 1;
             if(i0 < 0) i0 = 3;
-            let z = data[2][i1] / (data[2][i1] - data[2][i0]);
+            const z = data[2][i1] / (data[2][i1] - data[2][i0]);
             for(let i of [0, 1, 2, 5, 6, 8])
                 clippedData[i][clippedVertexCount]
                     = (data[i][i0] - data[i][i1]) * z + data[i][i1];
@@ -1256,7 +1280,7 @@ class OmniscentRenderer {
         
         // 0x0A9B
         for(let i = 0; i < 4; ++i) {
-            let z = data[2][i];
+            const z = data[2][i];
             if(z < 0) {
                 if(!neg) clip(i), neg = !neg;
                 for(let j = 0; j < 9; ++j)
@@ -1272,7 +1296,7 @@ class OmniscentRenderer {
         
         // 0x0AF7
         for(let i = 0; i < clippedVertexCount; ++i) {
-            let z = (13 - clippedData[2][i]) / 160;
+            const z = (13 - clippedData[2][i]) / 160;
             clippedDataI[3][i] = Math.round(clippedData[1][i] / z + 100);
             clippedDataI[4][i] = Math.round(clippedData[0][i] * 1.2 / z + 160) * 65536;
             clippedDataI[5][i] = Math.round(clippedDataI[5][i] / z);
@@ -1332,13 +1356,16 @@ class OmniscentRenderer {
             const width = size.x, height = size.y;
             
             this.sceneMesh.geometry = this.convertModel();
-            this.sceneMaterial.map
-                = new THREE.DataTexture(this.convertTexture(), 4 * 64, 4 * 64, THREE.RGBAFormat);
+            const colorTexture = this.convertTexture();
+            const lightMapTexture = this.convertLightMap();
+            this.sceneMaterial.uniforms.colorTexture.value = colorTexture;
+            this.sceneMaterial.uniforms.lightMapTexture.value = lightMapTexture;
             this.renderer.setViewport(0, (20 / 200) * height,
                 width, ((179 - 21 + 1) / 200) * height);
             this.renderer.render(this.scene, this.hardwareCamera);
             this.sceneMesh.geometry.dispose();
-            this.sceneMaterial.map.dispose();
+            colorTexture.dispose();
+            lightMapTexture.dispose();
         }
     }
     
@@ -1362,19 +1389,19 @@ class OmniscentRenderer {
     }
     
     convertModel() {
-        let positionData = [];
-        let colorData = [];
-        let textureCoordData = [];
-        let indexData = [];
+        const positionData = [];
+        const colorData = [];
+        const textureCoordData = [];
+        const indexData = [];
         
-        let textureUnitX = 1 / 4, textureUnitY = 1 / 4;
+        const textureUnitX = 1 / 4, textureUnitY = 1 / 4;
         let indexOffset = 0;
         for(let i = 0; i < this.model.quadCount; ++i) {
-            let quadIndex = this.sortList[i * 2 + 1];
-            let textureIndex = this.model.quads[quadIndex * 5 + 4];
+            const quadIndex = this.sortList[i * 2 + 1];
+            const textureIndex = this.model.quads[quadIndex * 5 + 4];
             let clipped = false;
             for(let j = 0; j < 4; ++j) {
-                let vertexIndex = this.model.quads[quadIndex * 5 + j];
+                const vertexIndex = this.model.quads[quadIndex * 5 + j];
                 if(this.model.transformedVertexs[vertexIndex * 3 + 2] + 512 < 0) {
                     clipped = true;
                     break;
@@ -1382,17 +1409,17 @@ class OmniscentRenderer {
             }
             if(clipped) continue;
             for(let j = 0; j < 4; ++j) {
-                let vertexIndex = this.model.quads[quadIndex * 5 + j];
+                const vertexIndex = this.model.quads[quadIndex * 5 + j];
                 for(let k = 0; k < 3; ++k)
                     positionData.push(this.model.transformedVertexs[vertexIndex * 3 + k]);
-                let color = textureIndex <= 2 ? 0xFF : (
-                    (this.model.vertexs[vertexIndex * 4 + 3] / 0x7F00)
-                    * (Math.min(511, this.model.transformedVertexs[vertexIndex * 3 + 2] + 512) / 511)
-                    * 0xFF) | 0;
-                colorData.push(color, color, color);
+                let z = Math.round(this.model.transformedVertexs[vertexIndex * 3 + 2]) + 512;
+                if(z < 0) z = 0;
+                if(z > 511) z = 511;
+                const color = ((z << 7) * this.model.vertexs[vertexIndex * 4 + 3]) >> 16;
+                colorData.push(color);
             }
-            let textureX = (textureIndex & 0x3) * textureUnitX;
-            let textureY = (textureIndex >> 2) * textureUnitY;
+            const textureX = (textureIndex & 0x3) * textureUnitX;
+            const textureY = (textureIndex >> 2) * textureUnitY;
             textureCoordData.push(
                 textureX, textureY + textureUnitY * (63 / 64),
                 textureX, textureY,
@@ -1404,49 +1431,64 @@ class OmniscentRenderer {
             indexOffset += 4;
         }
         
-        let geometry = new THREE.BufferGeometry();
+        const geometry = new THREE.BufferGeometry();
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positionData, 3));
-        geometry.setAttribute('color', new THREE.Uint8BufferAttribute(colorData, 3, true));
+        geometry.setAttribute('color', new THREE.Uint16BufferAttribute(colorData, 1, false));
         geometry.setAttribute('uv', new THREE.Float32BufferAttribute(textureCoordData, 2));
         geometry.setIndex(indexData);
         return geometry;
     }
     convertFrameBuffer(data) {
+        const WIDTH = 320, HEIGHT = 200;
         const palette = this.palette.getPalette();
-        let result = new Uint8Array(3 * 320 * 200);
-        for(let i = 0; i < 320 * 200; ++i) {
-            let value = data[i];
+        const result = new Uint8Array(3 * WIDTH * HEIGHT);
+        for(let i = 0; i < WIDTH * HEIGHT; ++i) {
+            const value = data[i];
             result[i * 3] = palette[value * 3];
             result[i * 3 + 1] = palette[value * 3 + 1];
             result[i * 3 + 2] = palette[value * 3 + 2];
         }
-        return result;
+        const texture = new THREE.DataTexture(result, WIDTH, HEIGHT, THREE.RGBFormat);
+        texture.needsUpdate = true;
+        return texture;
     }
     convertTexture() {
         const WIDTH = 4 * 64, HEIGHT = 4 * 64;
-        const palette = this.palette.getPalette();
         const textures = this.texture.getTextures();
-        const result = new Uint8Array(4 * WIDTH * HEIGHT);
+        const result = new Uint8Array(WIDTH * HEIGHT);
         for(let i = 0; i < 15; ++i) {
             const x0 = (i & 0x3) * 64, y0 = (i >> 2) * 64;
             for(let j = 0; j < 0x1000; ++j) {
                 const x1 = j & 0x3F, y1 = j >> 6;
                 const value = textures[i][j];
-                const index = 4 * ((y0 + y1) * WIDTH + (x0 + x1));
-                if(value === 0) {
-                    result[index] = 0x00;
-                    result[index + 1] = 0x00;
-                    result[index + 2] = 0x00;
-                    result[index + 3] = 0x00;
-                } else {
-                    result[index] = palette[value * 3];
-                    result[index + 1] = palette[value * 3 + 1];
-                    result[index + 2] = palette[value * 3 + 2];
-                    result[index + 3] = 0xFF;
+                const index = (y0 + y1) * WIDTH + (x0 + x1);
+                result[index] = value;
+            }
+        }
+        const texture = new THREE.DataTexture(result, WIDTH, HEIGHT, THREE.RedFormat);
+        texture.needsUpdate = true;
+        return texture;
+    }
+    convertLightMap() {
+        const WIDTH = 256, HEIGHT = 128;
+        const result = new Uint8Array(4 * WIDTH * HEIGHT);
+        const lightMap = this.lightMap.getLightMap();
+        const palette = this.palette.getPalette();
+        let index = 0;
+        for(let i = 0; i < 256; ++i) {
+            for(let j = 0; j < 128; ++j, ++index) {
+                const value = lightMap[index];
+                if(value !== 0) {
+                    result[index * 4] = palette[value * 3];
+                    result[index * 4 + 1] = palette[value * 3 + 1];
+                    result[index * 4 + 2] = palette[value * 3 + 2];
+                    result[index * 4 + 3] = 0xFF;
                 }
             }
         }
-        return result;
+        const texture = new THREE.DataTexture(result, WIDTH, HEIGHT, THREE.RGBAFormat);
+        texture.needsUpdate = true;
+        return texture;
     }
 }
 
@@ -1503,7 +1545,7 @@ class Omniscent {
         let startTime = getTime();
     loop:
         while(true) {
-            let currentFrame = Math.floor((getTime() - startTime) / unitTime);
+            const currentFrame = Math.floor((getTime() - startTime) / unitTime);
             while(lastFrame < currentFrame) {
                 this.onTimer();
                 if(this.stopping) break loop;
