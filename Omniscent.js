@@ -221,9 +221,9 @@ class OmniscentMIDI {
         // 0x052C
         for(let i = 1; i <= 15; ++i)
             this.sendMIDI([0xB0 + i, 0x7B, 0x00]);
-        if (this.midiOutput) {
+        if(this.midiOutput) {
             this.midiOutput.disconnect();
-            this.midiOutput = undefined;
+            this.midiOutput = null;
         }
     }
     onTimer() {
@@ -709,14 +709,13 @@ class OmniscentTexture {
             this.textures[i] = new Uint8Array(64 * 64);
         // 0x41ED-0x4246: Texture 0x01 data
         this.texture01Data = new Array(0x1E);
-        
-        // Int16 0x1362
-        this.doorCounter = -4250;
     }
     
     // 0x01BD-0x02FE
     reset() {
+        // Int16 0x1362
         this.doorCounter = -4250;
+        
         // 0x01BD-0x01C7
         // Generate texture 0x11
         this.generateCircleNoise(0x11, 0x05, 0x0320);
@@ -1527,9 +1526,15 @@ class Omniscent {
 }
 
 
-const canvas = document.getElementById('mainCanvas');
+const canvas = document.getElementById('main-canvas');
+
+const controls = {
+    play: document.getElementById('control-play'),
+    hardwareRenderer: document.getElementById('control-hardware-renderer'),
+    midiOut: document.getElementById('control-midi-out'),
+};
+
 const OMNISCENT = new Omniscent(canvas);
-const selectMidiOut = document.getElementById('selectmidiout');
 
 
 let frameCounter = 0;
@@ -1545,37 +1550,35 @@ setInterval(function() {
 
 function run() {
     if(!OMNISCENT.running) {
-        if (OMNISCENT.midi.midiOutput) {
+        if(OMNISCENT.midi.midiOutput)
             OMNISCENT.midi.midiOutput.disconnect();
-        }
-        OMNISCENT.midi.midiOutput = JZZ().openMidiOut(selectMidiOut.options[selectMidiOut.selectedIndex].value).or(function(){alert('Cannot open MIDI port!');});
-        selectMidiOut.disabled = true;
+        const midiOutName = controls.midiOut.options[controls.midiOut.selectedIndex].value;
+        if(midiOutName !== '(None)')
+            OMNISCENT.midi.midiOutput =
+                JZZ()
+                .openMidiOut(midiOutName)
+                .or(() => console.error('Cannot open MIDI Out port!'));
+        controls.midiOut.disabled = true;
         OMNISCENT.start().then(() => {
-            document.getElementById('play-btn').value = 'Play';
-            selectMidiOut.disabled = false;
+            controls.play.value = 'Play';
+            controls.midiOut.disabled = false;
         });
-    }
-    else
-        OMNISCENT.stop();
+    } else OMNISCENT.stop();
 }
 
-document.getElementById('play-btn').addEventListener('click', e => {
+controls.play.addEventListener('click', e => {
     run();
-    e.srcElement.value = OMNISCENT.running ? 'Stop' : 'Play';
+    controls.play.value = OMNISCENT.running ? 'Stop' : 'Play';
 });
 
-document.getElementById('hardware').addEventListener('click', e => {
-    OMNISCENT.useHardwareRenderer = e.srcElement.checked;
+controls.hardwareRenderer.addEventListener('click', e => {
+    OMNISCENT.useHardwareRenderer = controls.hardwareRenderer.checked;
 });
 
-JZZ.synth.Tiny.register('Synth');
-
-JZZ().and(function(){
-  var i;
-  for (i = 0; i < this.info().outputs.length; i++) {
-    selectMidiOut[i] = new Option(this.info().outputs[i].name);
-  }
-  if (!i) {
-    selectMidiOut[i] = new Option('Not available');
-  } 
+JZZ.synth.Tiny.register('JZZ synth Tiny');
+JZZ().and(function() {
+    let i = 0;
+    for(; i < this.info().outputs.length; ++i)
+        controls.midiOut[i] = new Option(this.info().outputs[i].name);
+    controls.midiOut[i] = new Option('(None)');
 });

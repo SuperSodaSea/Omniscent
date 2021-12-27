@@ -77,12 +77,11 @@
                 top: auto;
             }
             #controls {
-            	background-color: #aaa;
-            	padding: 2px;
+                background-color: #CCCCCC;
+                padding: 2px;
             }
         </style>
     </head>
-    
     <body>
         <span id="forkongithub">
             <a href="https://github.com/SuperSodaSea/Omniscent" target="_blank">Fork me on GitHub</a>
@@ -90,22 +89,25 @@
         <table border="0">
             <tr>
                 <td>
-                	<div id="fps"></div>
-                    <canvas id="mainCanvas" width="1" height="1"></canvas>
+                    <div id="fps">Loading...</div>
+                    <canvas id="main-canvas" width="1" height="1"></canvas>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div id="controls">
                     	Controls:
-                    	<input type="button" value="Play" id="play-btn">
-                    	<input type="checkbox" id="hardware"> Use hardware renderer
-                    	<span style="float: right;">MIDI Out: <select id=selectmidiout></select></span>
+                    	<input type="button" value="Play" id="control-play">
+                    	<input type="checkbox" id="control-hardware-renderer"> Use hardware renderer
+                    	<span style="float: right;">MIDI Out:
+                            <select id="control-midi-out">
+                                <option>(None)</option>
+                            </select>
+                        </span>
                     </div>
                 </td>
             </tr>
         </table>
         <script type="text/javascript" src="./Omniscent.js"></script>
     </body>
-
 </html>
