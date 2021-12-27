@@ -998,7 +998,7 @@ class OmniscentRenderer {
         
         this.generateText();
         
-        this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: false});
+        this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.autoClear = false;
         
@@ -1041,8 +1041,10 @@ class OmniscentRenderer {
                     gl_FragColor = texture2D(lightMapTexture, coord);
                 }
             `,
-            depthTest: false,
             side: THREE.BackSide,
+            depthTest: false,
+            transparent: true,
+            blending: THREE.NormalBlending,
         });
         this.sceneMesh = new THREE.Mesh(undefined, this.sceneMaterial);
         this.scene.add(this.sceneMesh);
@@ -1418,13 +1420,15 @@ class OmniscentRenderer {
                 const color = ((z << 7) * this.model.vertexs[vertexIndex * 4 + 3]) >> 16;
                 colorData.push(color);
             }
-            const textureX = (textureIndex & 0x3) * textureUnitX;
-            const textureY = (textureIndex >> 2) * textureUnitY;
+            const textureX0 = (textureIndex & 0x3) * textureUnitX;
+            const textureY0 = (textureIndex >> 2) * textureUnitY + 1e-3;
+            const textureX1 = textureX0 + textureUnitX * (63 / 64);
+            const textureY1 = textureY0 + textureUnitY * (63 / 64);
             textureCoordData.push(
-                textureX, textureY + textureUnitY * (63 / 64),
-                textureX, textureY,
-                textureX + textureUnitX * (63 / 64), textureY,
-                textureX + textureUnitX * (63 / 64), textureY + textureUnitY * (63 / 64),
+                textureX0, textureY1,
+                textureX0, textureY0,
+                textureX1, textureY0,
+                textureX1, textureY1,
             );
             indexData.push(indexOffset, indexOffset + 1, indexOffset + 2,
                 indexOffset, indexOffset + 2, indexOffset + 3);
