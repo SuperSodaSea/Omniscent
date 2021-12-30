@@ -1490,9 +1490,10 @@ class OmniscentRenderer {
         const result = new Uint8Array(4 * WIDTH * HEIGHT);
         const lightMap = this.lightMap.getLightMap();
         const palette = this.palette.getPalette();
-        let index = 256;
-        for(let i = 1; i < 128; ++i) {
-            for(let j = 0; j < 256; ++j, ++index) {
+        let index = 0;
+        for(let i = 0; i < 128; ++i) {
+            ++index;
+            for(let j = 1; j < 256; ++j, ++index) {
                 const value = lightMap[index];
                 result[index * 4] = palette[value * 3];
                 result[index * 4 + 1] = palette[value * 3 + 1];
