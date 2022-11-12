@@ -1,0 +1,45 @@
+name: Build
+on:
+    push:
+        branches: ['**']
+        tags: ['**']
+    pull_request:
+        branches: ['**']
+jobs:
+    build:
+        name: Build
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                node-version: 16
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                version: 7
+            - name: Install Packages
+              run: pnpm install --frozen-lockfile
+            - name: Build
+              run: pnpm build
+            - name: Upload Pages Artifact
+              uses: actions/upload-pages-artifact@v1
+              with:
+                path: dist
+    deploy:
+        name: Deploy
+        needs: build
+        if: github.repository == 'SuperSodaSea/Omniscent' && github.ref == 'refs/heads/main'
+        permissions:
+            id-token: write
+            pages: write
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy Pages
+              id: deployment
+              uses: actions/deploy-pages@v1

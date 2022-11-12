@@ -1,0 +1,19 @@
+{
+	"name": "omniscent",
+	"author": "SuperSodaSea",
+	"description": "Analyze of Mekka & Symposium 1997 PC 4K 1st \"Omniscent\"",
+	"license": "WTFPL",
+	"type": "module",
+	"scripts": {
+		"build": "webpack"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.20.2",
+		"@babel/preset-env": "^7.20.2",
+		"babel-loader": "^9.1.0",
+		"clean-webpack-plugin": "^4.0.0",
+		"html-webpack-plugin": "^5.5.0",
+		"webpack": "^5.75.0",
+		"webpack-cli": "^4.10.0"
+	}
+}
