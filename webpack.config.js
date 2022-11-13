@@ -41,5 +41,9 @@ export default {
             },
         ],
     },
+    performance: {
+        maxAssetSize: 2 ** 20,
+        maxEntrypointSize: 2 ** 20,
+    },
     devtool: 'source-map',
 };
