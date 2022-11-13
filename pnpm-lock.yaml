@@ -7,17 +7,15 @@ specifiers:
   base64-js: ^1.5.1
   clean-webpack-plugin: ^4.0.0
   html-webpack-plugin: ^5.5.0
-  jzz: ^1.5.3
-  jzz-synth-tiny: ^1.3.2
   three: ^0.146.0
+  webaudio-tinysynth: ^1.1.3
   webpack: ^5.75.0
   webpack-cli: ^4.10.0
 
 dependencies:
   base64-js: 1.5.1
-  jzz: 1.5.3
-  jzz-synth-tiny: 1.3.2
   three: 0.146.0
+  webaudio-tinysynth: 1.1.3
 
 devDependencies:
   '@babel/core': 7.20.2
@@ -1266,10 +1264,6 @@ packages:
     resolution: {integrity: sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==}
     dev: true
 
-  /@types/webmidi/2.0.6:
-    resolution: {integrity: sha512-sfS0A5IryqmBrUpcGPipEPeFdpqmZzP6b6lZFxHKgz5n2Vhzh4yJ5P2TvoDUhDjqJyv0Y25ng0Qodgo2Vu08ug==}
-    dev: false
-
   /@webassemblyjs/ast/1.11.1:
     resolution: {integrity: sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw==}
     dependencies:
@@ -2040,11 +2034,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /jazz-midi/1.7.6:
-    resolution: {integrity: sha512-vKCmBpotb1y+kEbRlu43COar2LzV46uOTTzyM/zTx5LR7WUTWle7FFC8rphqBVdryW66QtOyUA2N/DWZToBang==}
-    engines: {node: '>=10.0.0'}
-    dev: false
-
   /jest-worker/27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
@@ -2086,19 +2075,6 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: true
-
-  /jzz-synth-tiny/1.3.2:
-    resolution: {integrity: sha512-SVVu55AYopiWicnNVI5Xns+CA8UgdiADsqe4GpsuHLSRmvOGuC1VYz3uhqraXvNmhc4VHvqlBv5jUPNBnTtzvA==}
-    dependencies:
-      jzz: 1.5.3
-    dev: false
-
-  /jzz/1.5.3:
-    resolution: {integrity: sha512-gEih5CUMkK8n+2Mm5QHi+T64TLb68UxyQgYAOATSIA9Js3ZjMOmnGet48thbT1wLbh9J+NK+3wPcEiGo0OGvng==}
-    dependencies:
-      '@types/webmidi': 2.0.6
-      jazz-midi: 1.7.6
-    dev: false
 
   /kind-of/6.0.3:
     resolution: {integrity: sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==}
@@ -2602,6 +2578,10 @@ packages:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.10
     dev: true
+
+  /webaudio-tinysynth/1.1.3:
+    resolution: {integrity: sha512-ez+2R6GU0KHZ28wcZHxkbSCXGiSYybhyyTr6+WblTm/rOBfhqsNLbzdiNlZz5I0x/KLOHQUNl/75hZyGpoUJdQ==}
+    dev: false
 
   /webpack-cli/4.10.0_webpack@5.75.0:
     resolution: {integrity: sha512-NLhDfH/h4O6UOy+0LSso42xvYypClINuMNBVVzX4vX98TmTaTUxwRbXdhucbFMd2qLaCTcLq/PdYrvi8onw90w==}

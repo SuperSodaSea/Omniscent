@@ -1,7 +1,6 @@
 import { toByteArray as decodeBase64 } from 'base64-js';
-import JZZ from 'jzz';
-import JZZSynthTiny from 'jzz-synth-tiny';
 import * as THREE from 'three';
+import WebAudioTinySynth from 'webaudio-tinysynth';
 
 
 class OmniscentUtil {
@@ -160,8 +159,21 @@ class OmniscentMIDI {
     constructor() {
         this.generateMIDI();
         
-        this.midiOutput = null;
         this.midiIndexs = new Array(this.midiData.length);
+        
+        this._midiOutput = null;
+    }
+    
+    get midiOutput() {
+        if(!this._midiOutput)
+            this._midiOutput = new WebAudioTinySynth();
+        return this._midiOutput;
+    }
+    setVolume(volume) {
+        this.midiOutput.setMasterVol(volume);
+    }
+    sendMIDI(data) {
+        this.midiOutput.send(data);
     }
     
     // 0x014C-0x016A
@@ -193,10 +205,6 @@ class OmniscentMIDI {
         return p;
     }
     
-    sendMIDI(data) {
-        if(this.midiOutput)
-            this.midiOutput.send(data);
-    }
     async start() {
         for(let i = 0; i < this.midiData.length; ++i)
             this.midiIndexs[i] = [-2, 0];
@@ -208,10 +216,7 @@ class OmniscentMIDI {
         // 0x052C
         for(let i = 1; i <= 15; ++i)
             this.sendMIDI([0xB0 + i, 0x7B, 0x00]);
-        if(this.midiOutput) {
-            this.midiOutput.disconnect();
-            this.midiOutput = null;
-        }
+        this.midiOutput.stopMIDI();
     }
     onTimer() {
         // 0x0568
@@ -1577,7 +1582,7 @@ const canvas = document.getElementById('main-canvas');
 const controls = {
     play: document.getElementById('control-play'),
     hardwareRenderer: document.getElementById('control-hardware-renderer'),
-    midiOut: document.getElementById('control-midi-out'),
+    midiOutput: document.getElementById('control-midi-output'),
 };
 
 const OMNISCENT = new Omniscent(canvas);
@@ -1596,18 +1601,8 @@ setInterval(function() {
 
 function run() {
     if(!OMNISCENT.running) {
-        if(OMNISCENT.midi.midiOutput)
-            OMNISCENT.midi.midiOutput.disconnect();
-        const midiOutName = controls.midiOut.options[controls.midiOut.selectedIndex].value;
-        if(midiOutName !== '(None)')
-            OMNISCENT.midi.midiOutput =
-                JZZ()
-                .openMidiOut(midiOutName)
-                .or(() => console.error('Cannot open MIDI Out port!'));
-        controls.midiOut.disabled = true;
         OMNISCENT.start().then(() => {
             controls.play.value = 'Play';
-            controls.midiOut.disabled = false;
         });
     } else OMNISCENT.stop();
 }
@@ -1621,11 +1616,7 @@ controls.hardwareRenderer.addEventListener('click', e => {
     OMNISCENT.useHardwareRenderer = controls.hardwareRenderer.checked;
 });
 
-JZZSynthTiny(JZZ);
-JZZ.synth.Tiny.register('JZZ synth Tiny');
-JZZ().and(function() {
-    let i = 0;
-    for(; i < this.info().outputs.length; ++i)
-        controls.midiOut[i] = new Option(this.info().outputs[i].name);
-    controls.midiOut[i] = new Option('(None)');
+controls.midiOutput.addEventListener('click', e => {
+    const midiOutput = controls.midiOutput.checked;
+    OMNISCENT.midi.setVolume(midiOutput);
 });

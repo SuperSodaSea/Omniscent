@@ -10,9 +10,8 @@
     },
     "dependencies": {
         "base64-js": "^1.5.1",
-        "jzz": "^1.5.3",
-        "jzz-synth-tiny": "^1.3.2",
-        "three": "^0.146.0"
+        "three": "^0.146.0",
+        "webaudio-tinysynth": "^1.1.3"
     },
     "devDependencies": {
         "@babel/core": "^7.20.2",
