@@ -80,8 +80,7 @@
                 top: auto;
             }
         </style>
-        <% for(const tag of htmlWebpackPlugin.tags.headTags) { %>
-        <%= tag %><% } %>
+        <script defer src="./index.js"></script>
     </head>
     <body>
         <span id="forkongithub">
@@ -109,7 +108,5 @@
                 </td>
             </tr>
         </table>
-        <% for(const tag of htmlWebpackPlugin.tags.bodyTags) { %>
-        <%= tag %><% } %>
     </body>
 </html>

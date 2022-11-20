@@ -1130,7 +1130,6 @@ class OmniscentRenderer {
         
         // 0x0793
         if(maxX < 0 || minY > 320 || maxY < 21 || minY > 179) return;
-        // console.log(minX, minY, maxX, maxY);
         if(maxY > 179) maxY = 179;
         if(minY === maxY) return;
         let scanlineY = minY;
@@ -1500,7 +1499,7 @@ class OmniscentRenderer {
     }
 }
 
-class Omniscent {
+export class Omniscent {
     constructor(canvas) {
         this.canvas = canvas;
         
@@ -1544,8 +1543,6 @@ class Omniscent {
         
         function getTime() { return (new Date()).getTime(); }
         function wait() { return new Promise((resolve) => setTimeout(resolve, 10)); }
-                
-        console.log('Start.');
         
         await this.midi.start();
         
@@ -1564,8 +1561,6 @@ class Omniscent {
         
         this.midi.stop();
         
-        console.log('End.');
-        
         this.running = false;
         this.stopping = false;
     }
@@ -1575,48 +1570,3 @@ class Omniscent {
         this.stopping = true;
     }
 }
-
-
-const canvas = document.getElementById('main-canvas');
-
-const controls = {
-    play: document.getElementById('control-play'),
-    hardwareRenderer: document.getElementById('control-hardware-renderer'),
-    midiOutput: document.getElementById('control-midi-output'),
-};
-
-const OMNISCENT = new Omniscent(canvas);
-
-
-let frameCounter = 0;
-requestAnimationFrame(function _onRender() {
-    OMNISCENT.onRender();
-    ++frameCounter;
-    requestAnimationFrame(_onRender);
-});
-setInterval(function() {
-    document.getElementById('fps').innerHTML = 'FPS: ' + frameCounter;
-    frameCounter = 0;
-}, 1000);
-
-function run() {
-    if(!OMNISCENT.running) {
-        OMNISCENT.start().then(() => {
-            controls.play.value = 'Play';
-        });
-    } else OMNISCENT.stop();
-}
-
-controls.play.addEventListener('click', e => {
-    run();
-    controls.play.value = OMNISCENT.running ? 'Stop' : 'Play';
-});
-
-controls.hardwareRenderer.addEventListener('click', e => {
-    OMNISCENT.useHardwareRenderer = controls.hardwareRenderer.checked;
-});
-
-controls.midiOutput.addEventListener('click', e => {
-    const midiOutput = controls.midiOutput.checked;
-    OMNISCENT.midi.setVolume(midiOutput);
-});
