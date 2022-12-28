@@ -22,8 +22,10 @@ jobs:
                 version: 7
             - name: Install Packages
               run: pnpm install --frozen-lockfile
+            - name: Run Check
+              run: pnpm check
             - name: Build
-              run: pnpm build
+              run: pnpm dist
             - name: Upload Pages Artifact
               uses: actions/upload-pages-artifact@v1
               with:
