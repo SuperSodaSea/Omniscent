@@ -9,4 +9,5 @@ module.exports = {
     targets: [
         'since 2018',
     ],
+    comments: false,
 };

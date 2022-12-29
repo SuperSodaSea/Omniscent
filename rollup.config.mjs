@@ -39,7 +39,7 @@ export default (async () => {
             plugins: [
                 ...plugins,
                 rollupPluginDelete({
-                    targets: ['lib/*'],
+                    targets: ['lib/cjs/*', 'lib/esm/*'],
                 }),
             ],
             input: 'src/index.ts',

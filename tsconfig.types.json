@@ -1,11 +1,13 @@
 {
-    "extends": "./tsconfig.json",
+    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "declaration": true,
-        "emitDeclarationOnly": true,
-        
+        // Module
         "rootDir": "src",
-        "outDir": "lib/types"
+        "outDir": "lib/types",
+        
+        // Emit
+        "declaration": true,
+        "emitDeclarationOnly": true
     },
     "include": [
         "src/**/*.ts",

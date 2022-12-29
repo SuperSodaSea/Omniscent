@@ -1,29 +1,9 @@
 {
+    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "sourceMap": true,
-        "removeComments": false,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "isolatedModules": false,
-        "allowJs": false,
-        "strict": true,
-        "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
-        
-        "lib": ["esnext", "dom"],
-        
+        // Module
         "rootDir": ".",
-        "paths": {
-            "omniscent": ["./src"]
-        }
     },
-    "exclude": [
-        "node_modules",
-    ],
     "include": [
         "demo/**/*.ts",
         "src/**/*.ts",
