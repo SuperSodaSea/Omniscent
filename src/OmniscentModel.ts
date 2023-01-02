@@ -267,10 +267,10 @@ export class OmniscentModel {
                     ];
                     for(let j = 0; j < 14; ++j) {
                         const v = OmniscentUtil.rotateVector3([
-                                float32Table[j * 3],
-                                float32Table[j * 3 + 1],
-                                float32Table[j * 3 + 2]
-                            ], angles);
+                            float32Table[j * 3],
+                            float32Table[j * 3 + 1],
+                            float32Table[j * 3 + 2],
+                        ], angles);
                         float32Table[j * 3] = v[0];
                         float32Table[j * 3 + 1] = v[1];
                         float32Table[j * 3 + 2] = v[2];
@@ -298,8 +298,8 @@ export class OmniscentModel {
         const cameraMatrix = camera.getMatrix();
         for(let i = 0; i < this.vertexCount; ++i)
             for(let j = 0; j < 3; ++j)
-                this.transformedVertexs[i * 3 + j] =
-                    (this.vertexs[i * 4] - cameraPosition[0]) * cameraMatrix[j * 3]
+                this.transformedVertexs[i * 3 + j]
+                    = (this.vertexs[i * 4] - cameraPosition[0]) * cameraMatrix[j * 3]
                     + (this.vertexs[i * 4 + 1] - cameraPosition[1]) * cameraMatrix[j * 3 + 1]
                     + (this.vertexs[i * 4 + 2] - cameraPosition[2]) * cameraMatrix[j * 3 + 2];
     }

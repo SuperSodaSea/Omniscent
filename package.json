@@ -20,7 +20,7 @@
     },
     "scripts": {
         "lint": "eslint --cache --max-warnings=0 --ext .js,.cjs,.mjs,.ts .",
-        "lint:fix": "npm run lint --fix",
+        "lint:fix": "npm run lint -- --fix",
         "test:types": "tsc --noEmit",
         "build": "rollup -c",
         "build:dev": "rollup -cw",
@@ -45,6 +45,8 @@
         "@rollup/plugin-commonjs": "^23.0.4",
         "@rollup/plugin-node-resolve": "^15.0.1",
         "@types/three": "^0.146.0",
+        "@typescript-eslint/eslint-plugin": "^5.47.1",
+        "@typescript-eslint/parser": "^5.47.1",
         "esbuild": "^0.16.6",
         "eslint": "^8.29.0",
         "rollup": "^3.7.4",

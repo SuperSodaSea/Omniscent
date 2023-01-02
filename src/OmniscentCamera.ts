@@ -65,7 +65,7 @@ export class OmniscentCamera {
         const matrix2 = new Float32Array(9);
         for(let i = 0; i < 3; ++i)
             for(let j = 0; j < 3; ++j)
-                matrix2[i * 3 + j] = +(i === j);
+                matrix2[i * 3 + j] = Number(i === j);
         for(let i = 0; i < 3; ++i) {
             const v = OmniscentUtil.rotateVector3([
                     matrix2[i * 3],

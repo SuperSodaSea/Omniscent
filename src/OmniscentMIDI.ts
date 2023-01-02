@@ -1,11 +1,11 @@
 import WebAudioTinySynth from 'webaudio-tinysynth';
 
 
-type ChannelData = {
+interface ChannelData {
     channel: number;
     instrument: number;
     data: Uint8Array;
-};
+}
 
 export class OmniscentMIDI {
     // 0x0DE3-0x0F27: MIDI table
@@ -100,7 +100,7 @@ export class OmniscentMIDI {
     constructor() {
         this.midiData = this.generateMIDI();
         
-        this.midiIndexs = new Array(this.midiData.length);
+        this.midiIndexs = new Array<[number, number]>(this.midiData.length);
         
         this._midiOutput = null;
     }
@@ -131,7 +131,8 @@ export class OmniscentMIDI {
         return midiData;
     }
     // 0x063B-0x0659
-    generateMIDILoop(p: number, data: number[]) {
+    generateMIDILoop(offset: number, data: number[]) {
+        let p = offset;
         while(OmniscentMIDI.MIDI_TABLE[p] !== 0x00) {
             if(OmniscentMIDI.MIDI_TABLE[p] >= 0x80) {
                 const count = 0x100 - OmniscentMIDI.MIDI_TABLE[p++];

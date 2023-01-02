@@ -16,6 +16,7 @@ export class OmniscentRenderer {
     // 0x1043-0x1046: Texture coord V table
     static TEXTURE_COORD_V_TABLE = new Uint8Array([63, 0, 0, 63]);
     
+    // eslint-disable-next-line max-len
     static FONT = decodeBase64('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');
     
     private random: OmniscentRandom;
@@ -39,8 +40,8 @@ export class OmniscentRenderer {
     private sceneMesh: THREE.Mesh;
     private hardwareCamera: THREE.Camera;
     
-    private backgroundStarDrawn: boolean = false;
-    private rendererCounter: number = 0;
+    private backgroundStarDrawn = false;
+    private rendererCounter = 0;
     
     private sortList = new Int16Array();
     
@@ -58,7 +59,7 @@ export class OmniscentRenderer {
         
         this.generateText();
         
-        this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+        this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.autoClear = false;
         
@@ -87,10 +88,10 @@ export class OmniscentRenderer {
         this.scene = new THREE.Scene();
         this.sceneMaterial = new THREE.ShaderMaterial({
             uniforms: {
-                colorTexture: {value: null},
-                lightMapTexture: {value: null},
+                colorTexture: { value: null },
+                lightMapTexture: { value: null },
             },
-            vertexShader: glslPredef + `
+            vertexShader: `${ glslPredef }
                 attribute vec4 textureCoord;
                 attribute float light;
                 centroid_out vec4 textureCoordV;
@@ -101,7 +102,7 @@ export class OmniscentRenderer {
                     lightV = light;
                 }
             `,
-            fragmentShader: glslPredef + `
+            fragmentShader: `${ glslPredef }
                 uniform sampler2D colorTexture;
                 uniform sampler2D lightMapTexture;
                 centroid_in vec4 textureCoordV;
@@ -130,7 +131,7 @@ export class OmniscentRenderer {
         );
         this.hardwareCamera.scale.y = -1;
         
-        window.addEventListener('resize', () => this.onResize(), false);
+        window.addEventListener('resize', () => { this.onResize(); }, false);
         this.onResize();
         
         this.reset();
@@ -192,7 +193,7 @@ export class OmniscentRenderer {
             if(minX > x) minX = x;
             if(maxX < x) maxX = x;
             const y = OmniscentUtil.toInt16(clippedDataI[3][i]);
-            if(minY > y) minY = y, indexL = indexR = i;
+            if(minY > y) { minY = y; indexL = indexR = i; }
             if(maxY < y) maxY = y;
         }
         
@@ -231,7 +232,7 @@ export class OmniscentRenderer {
         const texture = this.texture.getTextures()[textureIndex];
         while(scanlineY <= maxY) {
             // 0x07E8
-            while(scanlineY <= maxY) { // while(true)?
+            while(true) { // while(scanlineY <= maxY)?
                 const y = OmniscentUtil.toInt16(clippedDataI[3][indexL]);
                 if(scanlineY !== y) break;
                 const index0 = indexL;
@@ -239,7 +240,7 @@ export class OmniscentRenderer {
                 interpolate(index0, indexL, 0);
             }
             // 0x0816
-            while(scanlineY <= maxY) { // while(true)?
+            while(true) { // while(scanlineY <= maxY)?
                 const y = OmniscentUtil.toInt16(clippedDataI[3][indexR]);
                 if(scanlineY !== y) break;
                 const index0 = indexR;
@@ -307,9 +308,9 @@ export class OmniscentRenderer {
     // 0x0A09-0x0B5F
     drawQuad(quadIndex: number) {
         // [BP - 0xBE, 0xBA, 0xB6, (0xB2), (0xAE), 0xAA, 0xA6, (0xA2), 0x9E]
-        const data = new Array(9), dataI = new Array(9);
+        const data = new Array<Float32Array>(9), dataI = new Array<Int32Array>(9);
         // [BP - 0x172, 0x16E, 0x16A, (0x166), (0x162), 0x15E, 0x15A, (0x156), 0x152]
-        const clippedData = new Array(9), clippedDataI = new Array(9);
+        const clippedData = new Array<Float32Array>(9), clippedDataI = new Array<Int32Array>(9);
         for(let i = 0; i < 9; ++i) {
             data[i] = new Float32Array(4);
             clippedData[i] = new Float32Array(5);
@@ -354,12 +355,12 @@ export class OmniscentRenderer {
         for(let i = 0; i < 4; ++i) {
             const z = data[2][i];
             if(z < 0) {
-                if(!neg) clip(i), neg = !neg;
+                if(!neg) { clip(i); neg = !neg; }
                 for(let j = 0; j < 9; ++j)
                     clippedDataI[j][clippedVertexCount] = dataI[j][i];
                 ++clippedVertexCount;
             } else {
-                if(neg) clip(i), neg = !neg;
+                if(neg) { clip(i); neg = !neg; }
             }
         }
         

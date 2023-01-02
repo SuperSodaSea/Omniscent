@@ -4,13 +4,13 @@ import { OmniscentRenderer } from "./OmniscentRenderer";
 
 export class Omniscent {
     // Use WebGL to render model instead of original software rasterizer
-    public useHardwareRenderer: boolean = false;
+    public useHardwareRenderer = false;
     
     private canvas: HTMLCanvasElement | OffscreenCanvas;
     public midi: OmniscentMIDI;
     private renderer: OmniscentRenderer;
-    public running: boolean = false;
-    private stopping: boolean = false;
+    public running = false;
+    private stopping = false;
     
     constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
         this.canvas = canvas;
@@ -51,7 +51,7 @@ export class Omniscent {
         const unitTime = 1000 / 350;
         
         function getTime() { return (new Date()).getTime(); }
-        function wait() { return new Promise((resolve) => setTimeout(resolve, 10)); }
+        function wait() { return new Promise(resolve => { setTimeout(resolve, 10); }); }
         
         await this.midi.start();
         

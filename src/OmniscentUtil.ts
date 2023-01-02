@@ -9,7 +9,8 @@ export class OmniscentUtil {
     ]);
     
     // 0x0611-0x062F
-    static drawStar(data: Uint8Array, index: number, stride: number, color: number, value: number) {
+    static drawStar(data: Uint8Array, offset: number, stride: number, color: number, value: number) {
+        let index = offset;
         for(let i = 0, p = 0; i < 5; ++i, index += stride)
             for(let j = 0; j < 5; ++j, ++p, ++index) {
                 const x = OmniscentUtil.STAR_PATTERN[p];
@@ -42,25 +43,28 @@ export class OmniscentUtil {
     
     // 0x0BAD-0x0BCF
     static rotateVector2(vector: [number, number], angle: number) {
-        angle *= Math.PI / 0x10000;
-        const c = Math.cos(angle), s = Math.sin(angle);
+        const a = angle * (Math.PI / 0x10000);
+        const c = Math.cos(a), s = Math.sin(a);
         return [c * vector[0] - s * vector[1], s * vector[0] + c * vector[1]];
     }
     // 0x0BD0-0x0BFB
     static rotateVector3(vector: [number, number, number], angle: [number, number, number]) {
         const result = [vector[0], vector[1], vector[2]];
         const a = OmniscentUtil.rotateVector2([result[1], result[2]], angle[2]);
-        result[1] = a[0], result[2] = a[1];
+        result[1] = a[0];
+        result[2] = a[1];
         const b = OmniscentUtil.rotateVector2([result[2], result[0]], angle[1]);
-        result[2] = b[0], result[0] = b[1];
+        result[2] = b[0];
+        result[0] = b[1];
         const c = OmniscentUtil.rotateVector2([result[0], result[1]], angle[0]);
-        result[0] = c[0], result[1] = c[1];
+        result[0] = c[0];
+        result[1] = c[1];
         return result;
     }
     
     static toInt16(x: number) {
-        x &= 0xFFFF;
-        if(x >= 0x8000) x -= 0x10000;
-        return x;
+        let y = x & 0xFFFF;
+        if(y >= 0x8000) y -= 0x10000;
+        return y;
     }
 }

@@ -1,6 +1,6 @@
 export class OmniscentRandom {
-    private randomA: number = 0;
-    private randomB: number = 0;
+    private randomA = 0;
+    private randomB = 0;
     
     constructor() {
         this.reset();

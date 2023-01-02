@@ -31,7 +31,7 @@ export default (async () => {
     const { dependencies } = pkg;
     const external = [
         ...Object.keys(dependencies || [])
-            .flatMap(name => [name, new RegExp(`^${name}/`)]),
+            .flatMap(name => [name, new RegExp(`^${ name }/`)]),
     ];
     
     return [
@@ -81,6 +81,6 @@ export default (async () => {
                 format: 'iife',
                 sourcemap: true,
             },
-        }
+        },
     ];
 })();

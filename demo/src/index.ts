@@ -16,8 +16,8 @@ requestAnimationFrame(function _onRender() {
     ++frameCounter;
     requestAnimationFrame(_onRender);
 });
-setInterval(function() {
-    fps.innerHTML = 'FPS: ' + frameCounter;
+setInterval(() => {
+    fps.innerHTML = `FPS: ${ frameCounter }`;
     frameCounter = 0;
 }, 1000);
 
@@ -40,5 +40,5 @@ controlHardwareRenderer.addEventListener('click', () => {
 
 controlMidiOutput.addEventListener('click', () => {
     const midiOutput = controlMidiOutput.checked;
-    OMNISCENT.midi.setVolume(+midiOutput);
+    OMNISCENT.midi.setVolume(Number(midiOutput));
 });

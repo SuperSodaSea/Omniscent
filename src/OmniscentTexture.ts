@@ -54,16 +54,16 @@ export class OmniscentTexture {
     private random: OmniscentRandom;
     private textures: Uint8Array[];
     private texture01Data: number[][];
-    private doorCounter: number = 0;
+    private doorCounter = 0;
     
     constructor(random: OmniscentRandom) {
         this.random = random;
         
-        this.textures = new Array(0x14);
+        this.textures = new Array<Uint8Array>(0x14);
         for(let i = 0; i < 0x14; ++i)
             this.textures[i] = new Uint8Array(64 * 64);
         // 0x41ED-0x4246: Texture 0x01 data
-        this.texture01Data = new Array(0x1E);
+        this.texture01Data = new Array<number[]>(0x1E);
     }
     
     // 0x01BD-0x02FE
@@ -98,12 +98,11 @@ export class OmniscentTexture {
         
         // 0x020E-0x022C
         // Generate texture 0x01 data
-        for(let i = 0; i < 0x1E; ++i) {
-            const t = new Array(2);
-            t[0] = this.random.random(0x100);
-            t[1] = this.random.random(0xEC0 + 0x80) + 0x40;
-            this.texture01Data[i] = t;
-        }
+        for(let i = 0; i < 0x1E; ++i)
+            this.texture01Data[i] = [
+                this.random.random(0x100),
+                this.random.random(0xEC0 + 0x80) + 0x40,
+            ];
         
         // 0x022D-0x0259
         // Generate texture 0x00
@@ -133,8 +132,10 @@ export class OmniscentTexture {
         for(let i = 0, p = 0; i < 0x1A; ++i, p += 6) {
             const dst = this.textures[OmniscentTexture.TEXTURE_PATTERN_TABLE[p] & 0x0F];
             const mode = OmniscentTexture.TEXTURE_PATTERN_TABLE[p] >> 4;
-            const x0 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 1], y0 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 2];
-            const x1 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 3], y1 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 4];
+            const x0 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 1];
+            const y0 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 2];
+            const x1 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 3];
+            const y1 = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 4];
             const offset = OmniscentTexture.TEXTURE_PATTERN_TABLE[p + 5];
             for(let y = y0; y <= y1; ++y)
                 for(let x = x0; x <= x1; ++x) {
@@ -210,7 +211,7 @@ export class OmniscentTexture {
         const texture = this.textures[id];
         texture.fill(0x00);
         
-        const table = new Array(r * 2);
+        const table = new Array<number>(r * 2);
         for(let i = r; i > -r; --i)
             table[r - i] = Math.round(Math.sqrt(r * r - i * i)) | 0;
         for(let i = 0; i < n; ++i) {
