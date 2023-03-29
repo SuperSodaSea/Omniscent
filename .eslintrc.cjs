@@ -114,11 +114,7 @@ module.exports = {
         'max-params': 'off',
         'max-statements': 'off',
         'multiline-comment-style': 'off',
-        'new-cap': ['error', {
-            newIsCap: true,
-            capIsNew: true,
-            properties: true,
-        }],
+        'new-cap': 'off',
         'no-alert': 'off',
         'no-array-constructor': 'off',
         'no-bitwise': 'off',
